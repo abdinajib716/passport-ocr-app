@@ -126,6 +126,24 @@ export async function POST(request) {
     const prediction = result.document.inference.prediction
     const document = result.document
     
+    // Check if the image actually contains a passport
+    const hasMinimumPassportFields = prediction.surname?.value && 
+      (prediction.id_number?.value || prediction.given_names?.length > 0);
+    
+    // Check confidence levels of key fields
+    const hasReasonableConfidence = 
+      (prediction.surname?.confidence > 0.3) || 
+      (prediction.id_number?.confidence > 0.3);
+    
+    // If it doesn't look like a passport, return an error
+    if (!hasMinimumPassportFields || !hasReasonableConfidence) {
+      console.error('❌ No valid passport detected in the image')
+      return NextResponse.json(
+        { error: 'No valid passport detected in the uploaded image. Please upload a clear image of a passport.' },
+        { status: 400 }
+      )
+    }
+    
     // Debug prediction data for PDF issues
     console.log('Gender field raw data:', prediction.gender);
     console.log('Birth date field raw data:', prediction.birth_date);

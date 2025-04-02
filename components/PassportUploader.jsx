@@ -574,40 +574,6 @@ export default function PassportUploader({ onDataExtracted }) {
             </div>
           </motion.div>
         )}
-        
-        {/* Error message with motion */}
-        <AnimatePresence>
-          {error && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="mt-4"
-            >
-              <div className="bg-red-50 rounded-lg border border-red-100 p-4">
-                <div className="flex items-start space-x-3">
-                  <div className="p-1 bg-red-100 rounded-full">
-                    <AlertCircle className="h-5 w-5 text-red-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-red-800">Processing Error</h3>
-                    <p className="text-sm text-red-700 mt-1">{error}</p>
-                    <motion.button
-                      whileHover={{ scale: 1.03 }}
-                      whileTap={{ scale: 0.97 }}
-                      className="mt-2 text-sm text-red-600 hover:text-red-800 flex items-center gap-1"
-                      onClick={() => setError(null)}
-                      aria-label="Dismiss error message"
-                    >
-                      <X className="h-3 w-3" />
-                      <span>Dismiss</span>
-                    </motion.button>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </motion.div>
     )
   }
