@@ -22,9 +22,7 @@ const nextConfig = {
   // Configure optimization
   experimental: {
     optimizeCss: true, // Enable CSS optimization
-    critters: false, // Disable critters to prevent the error
     optimizePackageImports: ['lucide-react'],
-    serverActions: true,
   },
 
   // Webpack configuration

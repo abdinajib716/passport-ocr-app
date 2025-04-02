@@ -1,10 +1,17 @@
 import React from 'react'
-import { Inter } from 'next/font/google'
+import { Poppins } from 'next/font/google'
 import './globals.css'
-import AnimatedHeader from '@/components/AnimatedLayout'
+import AnimatedLayout from '@/components/AnimatedLayout'
 import { Toaster } from 'react-hot-toast'
 
-const inter = Inter({ subsets: ['latin'] })
+// Configure Poppins font with only the weights we need
+const poppins = Poppins({
+  weight: ['400', '500', '600', '700'],
+  subsets: ['latin'],
+  display: 'swap',
+  fallback: ['system-ui', 'arial', 'sans-serif'],
+  preload: false, // Avoid preloading to prevent timeout errors
+})
 
 export const metadata = {
   title: 'Passport OCR Data Extraction',
@@ -15,11 +22,11 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={poppins.className}>
         <div className="min-h-screen bg-gray-50 flex flex-col">
-          <AnimatedHeader>
+          <AnimatedLayout>
             {children}
-          </AnimatedHeader>
+          </AnimatedLayout>
           
           <Toaster 
             position="top-center" 

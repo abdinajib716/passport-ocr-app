@@ -387,7 +387,14 @@ export default function PassportDataDisplay({ data, onReset }) {
             <DataField label="ID Number" data={p.id_number} icon={CreditCard} />
             <DataField label="Date of Birth" data={p.birth_date} icon={Calendar} />
             <DataField label="Birth Place" data={p.birth_place} icon={MapPin} />
-            <DataField label="Gender" data={p.gender} icon={User} />
+            <DataField 
+              label="Gender" 
+              data={{
+                value: p.gender?.value || null, 
+                confidence: p.gender?.confidence || 0
+              }} 
+              icon={User} 
+            />
           </CardContent>
         </TabsContent>
         

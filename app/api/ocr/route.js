@@ -125,6 +125,10 @@ export async function POST(request) {
     // Extract the prediction and format the response
     const prediction = result.document.inference.prediction
     const document = result.document
+    
+    // Debug prediction data for PDF issues
+    console.log('Gender field raw data:', prediction.gender);
+    console.log('Birth date field raw data:', prediction.birth_date);
 
     // Basic response structure
     const formattedResponse = {
@@ -152,7 +156,13 @@ export async function POST(request) {
           confidence: prediction.birth_place?.confidence || 0
         },
         gender: {
-          value: prediction.gender?.value || null,
+          // Ensure gender is correctly mapped and not overridden by birth_date
+          // If gender value matches a date pattern, it's likely incorrect
+          value: (prediction.gender?.value && !isDatePattern(prediction.gender.value)) 
+            ? prediction.gender.value 
+            : (prediction.gender?.value === 'M' || prediction.gender?.value === 'F' || prediction.gender?.value === 'X')
+              ? prediction.gender.value
+              : 'N/A',
           confidence: prediction.gender?.confidence || 0
         },
         issuance_date: {
@@ -186,4 +196,10 @@ export async function POST(request) {
       { status: 500 }
     )
   }
+}
+
+// Helper function to check if a string matches a date pattern
+function isDatePattern(str) {
+  const dateRegex = /^\d{1,2}\/\d{1,2}\/\d{2,4}$/;
+  return dateRegex.test(str);
 }
