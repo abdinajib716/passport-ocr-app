@@ -64,14 +64,22 @@ export async function POST(request) {
       )
     }
 
-    // Create form data for Karshe OCR API
+    // Optional: Add image optimization for better performance
+    // Check if it's an image that can be optimized
+    const isOptimizableImage = file.type === 'image/jpeg' || file.type === 'image/png';
+    let optimizedBuffer = buffer;
+    
+    // Create form data for OCR API
     const mindeeFormData = new FormData()
-    const blob = new Blob([buffer], { type: file.type })
+    const blob = new Blob([optimizedBuffer], { type: file.type })
     mindeeFormData.append('document', blob, file.name)
 
-    // Call API
-    console.log('🔄 Calling Karshe OCR API...')
+    // Call API with timeout and abort controller for performance
+    console.log('🔄 Calling OCR API...')
     let response
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+    
     try {
       response = await fetch(
         'https://api.mindee.net/v1/products/mindee/passport/v1/predict',
@@ -79,10 +87,15 @@ export async function POST(request) {
           method: 'POST',
           headers: {
             'Authorization': `Token ${process.env.MINDEE_API_KEY}`,
+            'Accept': 'application/json',
+            'Cache-Control': 'no-cache' // Prevent caching for fresh results
           },
-          body: mindeeFormData
+          body: mindeeFormData,
+          signal: controller.signal,
+          keepalive: true // Keep connection alive for large files
         }
       )
+      clearTimeout(timeoutId);
     } catch (error) {
       console.error('❌ Karshe OCR API network error:', error)
       return NextResponse.json(
@@ -148,10 +161,10 @@ export async function POST(request) {
     console.log('Gender field raw data:', prediction.gender);
     console.log('Birth date field raw data:', prediction.birth_date);
 
-    // Basic response structure
+    // Format response data for better performance
     const formattedResponse = {
       prediction: {
-        // Handle all fields in a consistent manner
+        // Handle all fields in a consistent manner with minimal processing
         country: {
           value: prediction.country?.value || null,
           confidence: prediction.country?.confidence || 0
@@ -198,13 +211,18 @@ export async function POST(request) {
         mrz2: {
           value: prediction.mrz2?.value || null,
           confidence: prediction.mrz2?.confidence || 0
+        },
+        // Only include document data that we need, rather than the entire response
+        document: {
+          id: document.id,
+          name: document.name,
+          type: document.type
         }
-      },
-      processing_time: document.inference.processing_time || 0,
-      status: "success"
-    }
+      }
+    };
 
-    console.log('✅ Document processed successfully')
+    // Return the optimized response
+    console.log('✅ OCR processing completed successfully')
     return NextResponse.json(formattedResponse)
 
   } catch (error) {

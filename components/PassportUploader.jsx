@@ -130,11 +130,13 @@ export default function PassportUploader({ onDataExtracted }) {
   
   // Process the document with the OCR API
   const processPassport = async () => {
-    setIsProcessing(true);
-    setError(null);
-    setProgress(10); // Start progress
+    if (!file || isProcessing) return;
     
-    // Create a toast notification with loading state
+    // Reset any existing error
+    setError(null);
+    setIsProcessing(true);
+    
+    // Show loading toast
     const toastId = toast.loading('Processing your document...');
     
     try {
@@ -145,12 +147,20 @@ export default function PassportUploader({ onDataExtracted }) {
       // Show progress
       setProgress(30);
       
-      // Call the API
+      // Call the API with timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
+      
       const response = await fetch('/api/ocr', {
         method: 'POST',
         body: formData,
+        signal: controller.signal,
+        headers: {
+          'Cache-Control': 'no-cache',
+        },
       });
       
+      clearTimeout(timeoutId);
       setProgress(70);
       
       if (!response.ok) {
